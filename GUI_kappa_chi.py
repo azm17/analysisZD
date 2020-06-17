@@ -61,7 +61,7 @@ def change_5310(canvas, ax):
 
 def save_fig():
     filepath = filedialog.askdirectory(initialdir = dir)
-    path = filepath + '\\fig.png'
+    path = filepath + '\\fig.pdf'
     print('save_Image')
     print(path)
     plt.savefig(path)
@@ -82,20 +82,20 @@ def DrawCanvas(canvas, ax, colors = "gray"):
     
     expected_payoff = [RE,SE,TE,PE]
     
-    plt.ylabel(f"$\kappa$ ", fontsize=15)
-    plt.xlabel(f"$\chi_c$ ", fontsize=15)
+    plt.ylabel(f"Base line payoff $\kappa$ ", fontsize=20)
+    plt.xlabel(f"Correlation factor $\chi$ ", fontsize=20)
     
     plt.grid()
-    
+    plt.rcParams['xtick.direction'] = 'in'#x軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
+    plt.rcParams['ytick.direction'] = 'in'#y軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
+    plt.gca().yaxis.set_major_formatter(plt.FormatStrFormatter('%.1f'))#y軸小数点以下3桁表示
     plt.xlim([0, 20])
     plt.ylim([S, T])
-        
+    
     delta_c1 = (T - R) / (mu*(RE-PE)-eta*(TE-SE)+TE-RE)
     delta_c2 = (P - S) / (mu*(RE-PE)-eta*(TE-SE)+PE-SE)
     delta_c = max(delta_c1, delta_c2)
     
-    #chi_c1 = 1 + (1 - delta) * (T - S) / (delta * (T - P) - (T - R))
-    #chi_c2 = 1 + (1 - delta) * (T - S) / (delta * (R - S) - (P - S))
     chi_c1 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) / (delta * (mu*(RE-PE)-eta*(TE-SE)) - (1-delta)*(TE - RE))
     chi_c2 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) / (delta * (mu*(RE-PE)-eta*(TE-SE)) - (1-delta)*(PE - SE))
     chi_c = max(chi_c1, chi_c2)
@@ -105,33 +105,46 @@ def DrawCanvas(canvas, ax, colors = "gray"):
     kappa_list3 = []; kappa_list4 = []
     kappa_p0_0_list = []; kappa_p0_1_list = []
     
+    option = 'a'
     if delta >= delta_c:
         for chi in chi_list:
-            kappa_list1.append(kappa1(chi, delta, p0, eta, expected_payoff))
-            kappa_list2.append(kappa2(chi, delta, p0, eta, expected_payoff))
-            
-            kappa_list3.append(kappa3(chi, delta, p0, eta, expected_payoff))
-            kappa_list4.append(kappa4(chi, delta, p0, eta, expected_payoff))
-            
+            if option == 'ALL':
+                kappa_list1.append(kappa1(chi, delta, p0, eta, expected_payoff))
+                kappa_list2.append(kappa2(chi, delta, p0, eta, expected_payoff))
+                
+                kappa_list3.append(kappa3(chi, delta, p0, eta, expected_payoff))
+                kappa_list4.append(kappa4(chi, delta, p0, eta, expected_payoff))
+            else:
+                kappa_list1.append(min(kappa1(chi, delta, p0, eta, expected_payoff),
+                                       kappa3(chi, delta, p0, eta, expected_payoff)))
+                kappa_list2.append(max(kappa2(chi, delta, p0, eta, expected_payoff),
+                                       kappa4(chi, delta, p0, eta, expected_payoff)))
             
             
             kappa_p0_0_list.append(min(kappa1(chi, delta, 1, eta, expected_payoff),
                                        kappa3(chi, delta, 1, eta, expected_payoff)))
-            kappa_p0_1_list.append(min(kappa2(chi, delta, 0, eta, expected_payoff),
+            kappa_p0_1_list.append(max(kappa2(chi, delta, 0, eta, expected_payoff),
                                        kappa4(chi, delta, 0, eta, expected_payoff)))
         
         plt.plot(chi_list, kappa_p0_0_list, 'k', markersize=3, alpha=0.4)
         plt.plot(chi_list, kappa_p0_1_list, 'k', markersize=3, alpha=0.4)
         
-        plt.plot(chi_list, kappa_list1, 'g', markersize=3, label = 'kappa1')
-        plt.plot(chi_list, kappa_list2, 'b', markersize=3, label = 'kappa2')
-        plt.plot(chi_list, kappa_list3, 'r', markersize=3, label = 'kappa3')
-        plt.plot(chi_list, kappa_list4, 'y', markersize=3, label = 'kappa4')
+        #plt.plot(chi_list, kappa_list1, 'g', markersize=3, label = 'kappa1')
+        #plt.plot(chi_list, kappa_list2, 'g', markersize=3, label = 'kappa2')
         
+        plt.fill_between(chi_list,kappa_p0_0_list,kappa_p0_1_list,facecolor='k',alpha=0.05)
         
-        plt.axvline(x=chi_c, markersize=3)
-        plt.rcParams["font.size"] = 10
-        plt.legend()
+        if option == 'ALL':
+            plt.plot(chi_list, kappa_list3, 'r', markersize=3, label = 'kappa3')
+            plt.plot(chi_list, kappa_list4, 'y', markersize=3, label = 'kappa4')
+        else:
+            pass
+            #plt.fill_between(chi_list,kappa_list1,kappa_list2,facecolor='g',alpha=0.1)
+        
+        plt.axvline(x=chi_c, linewidth = 2.0, color='royalblue')
+        plt.rcParams["font.size"] = 15
+        plt.tick_params(labelsize=13)
+        # plt.legend()
         
         txt.delete(0, tkinter.END)
         txt.insert(tkinter.END, r"exist ZD strategies")
@@ -156,7 +169,7 @@ if __name__ == "__main__":
         root.title("GUI- kappa_chi_c")
         
         #generate graph
-        fig,ax1 = plt.subplots(figsize = (8,6), dpi=70)
+        fig,ax1 = plt.subplots(figsize=(8,6), dpi=70)
         # fig.gca().set_aspect('equal', adjustable='box')
         
         #generate Canvas

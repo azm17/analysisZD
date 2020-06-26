@@ -36,7 +36,7 @@ def kappa3(chi, delta, p0, eta, expected_payoff):
     mu = 1 - eta
     return RE - eta / (mu - eta) * (TE - RE + (TE - SE) / (chi - 1)) \
             - (1 - delta) * (1 - p0) * (RE - PE + (TE - SE) / (chi - 1) + (mu * (PE - SE) - eta * (TE - RE)) / (mu - eta))
-                
+
 def kappa4(chi, delta, p0, eta, expected_payoff):
     # RE = expected_payoff[0]
     SE = expected_payoff[1]
@@ -52,11 +52,11 @@ def Quit():
     root.destroy()
 
 def change_5310(canvas, ax):
-    global T,R,P,S
-    if T == 5:
-        T,R,P,S=1.5,1,0,-0.5
+    global TE,RE,PE,SE
+    if TE == 5:
+        TE, RE, PE, SE = 1.5, 1, 0, -0.5
     else:
-        T,R,P,S=5,3,1,0
+        TE, RE, PE, SE = 5, 3, 1, 0
     DrawCanvas(canvas, ax, colors = "gray")
 
 def save_fig():
@@ -74,13 +74,18 @@ def DrawCanvas(canvas, ax, colors = "gray"):
     eta = round(scale7.get()/1000,3)
     
     # plt.title(r"aaa", fontsize=15)
-    RE = R*(1-eta)+S*eta
-    SE = S*(1-eta)+R*eta
-    TE = T*(1-eta)+P*eta
-    PE = P*(1-eta)+T*eta
-    mu = 1 -eta
+    # RE = R * (1 - eta) + S * eta
+    # SE = S * (1 - eta) + R * eta
+    # TE = T * (1 - eta) + P * eta
+    # PE = P * (1 - eta) + T * eta
+    #TE = 1.5
+    #RE = 1.0
+    #PE = 0.0
+    #SE = -0.5
     
-    expected_payoff = [RE,SE,TE,PE]
+    mu = 1 - eta
+    
+    expected_payoff = [RE, SE, TE, PE]
     
     plt.ylabel(f"Base line payoff $\kappa$ ", fontsize=20)
     plt.xlabel(f"Correlation factor $\chi$ ", fontsize=20)
@@ -90,10 +95,13 @@ def DrawCanvas(canvas, ax, colors = "gray"):
     plt.rcParams['ytick.direction'] = 'in'#y軸の目盛線が内向き('in')か外向き('out')か双方向か('inout')
     plt.gca().yaxis.set_major_formatter(plt.FormatStrFormatter('%.1f'))#y軸小数点以下3桁表示
     plt.xlim([0, 20])
-    plt.ylim([S, T])
+    plt.ylim([SE, TE])
+    plt.tick_params(labelsize = 18)
+    plt.yticks([-0.5, 0, 0.5, 1.0, 1.5])
+    plt.xticks([1, 5, 10, 15, 20])
     
-    delta_c1 = (T - R) / (mu*(RE-PE)-eta*(TE-SE)+TE-RE)
-    delta_c2 = (P - S) / (mu*(RE-PE)-eta*(TE-SE)+PE-SE)
+    delta_c1 = (TE - RE) / (mu*(RE-PE)-eta*(TE-SE)+TE-RE)
+    delta_c2 = (PE - SE) / (mu*(RE-PE)-eta*(TE-SE)+PE-SE)
     delta_c = max(delta_c1, delta_c2)
     
     chi_c1 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) / (delta * (mu*(RE-PE)-eta*(TE-SE)) - (1-delta)*(TE - RE))
@@ -129,8 +137,8 @@ def DrawCanvas(canvas, ax, colors = "gray"):
         plt.plot(chi_list, kappa_p0_0_list, 'k', markersize=3, alpha=0.4)
         plt.plot(chi_list, kappa_p0_1_list, 'k', markersize=3, alpha=0.4)
         
-        #plt.plot(chi_list, kappa_list1, 'g', markersize=3, label = 'kappa1')
-        #plt.plot(chi_list, kappa_list2, 'g', markersize=3, label = 'kappa2')
+        plt.plot(chi_list, kappa_list1, 'g', markersize=3, label = 'kappa1')
+        plt.plot(chi_list, kappa_list2, 'g', markersize=3, label = 'kappa2')
         
         plt.fill_between(chi_list,kappa_p0_0_list,kappa_p0_1_list,facecolor='k',alpha=0.05)
         
@@ -143,7 +151,7 @@ def DrawCanvas(canvas, ax, colors = "gray"):
         
         plt.axvline(x=chi_c, linewidth = 2.0, color='royalblue')
         plt.rcParams["font.size"] = 15
-        plt.tick_params(labelsize=13)
+        
         # plt.legend()
         
         txt.delete(0, tkinter.END)
@@ -153,7 +161,7 @@ def DrawCanvas(canvas, ax, colors = "gray"):
         txt_Result.insert(tkinter.END, f'chi_c = {round(chi_c, 3)}')
         
         txt_Parameters.delete(0, tkinter.END)
-        txt_Parameters.insert(tkinter.END, f'(T,R,P,S)=({T},{R},{P},{S}), p0={p0}, delta={delta}, eta={eta}')
+        txt_Parameters.insert(tkinter.END, f'(TE,RE,PE,SE)=({TE},{RE},{PE},{SE}), p0={p0}, delta={delta}, eta={eta}')
 
     else:
         txt.delete(0, tkinter.END)
@@ -175,7 +183,10 @@ if __name__ == "__main__":
         #generate Canvas
         Canvas = FigureCanvasTkAgg(fig, master=root)
         Canvas.get_tk_widget().grid(row=0, column=0, rowspan=1000)
-        T,R,P,S = 1.5,1,0,-0.5
+        TE = 1.5
+        RE = 1.0
+        PE = 0.0
+        SE = -0.5
         # q_list=[[random.random(),random.random(),random.random(),random.random(),random.random()] for i in range(1000)]
         
         #ReDrawButton = tkinter.Button(text="Other Opponent", width=15, command=partial(change_q, Canvas, ax1))
@@ -202,7 +213,7 @@ if __name__ == "__main__":
         scale5.grid(row=2, column=1, columnspan=1)
         scale_p0 = tkinter.Scale(root, label='p0',orient='h', from_=0, to=1000, command=partial(DrawCanvas, Canvas, ax1))
         scale_p0.grid(row=3, column=1, columnspan=1)
-        scale7 = tkinter.Scale(root, label='eta', orient='h', from_=0, to=300, command=partial(DrawCanvas, Canvas, ax1))
+        scale7 = tkinter.Scale(root, label='eta', orient='h', from_=0, to=500, command=partial(DrawCanvas, Canvas, ax1))
         scale7.grid(row=4, column=1, columnspan=1)
         
         QuitButton = tkinter.Button(text="Quit", width=15, command=Quit)

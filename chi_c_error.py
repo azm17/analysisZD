@@ -8,20 +8,20 @@ Created on Wed Apr 22 20:16:55 2020
 import matplotlib.pyplot as plt
 import numpy as np
 
-payoff={'T':1.5, 'R':1.0, 'P':0.0, 'S':-0.5}
+payoff = {'T':1.5, 'R':1.0, 'P':0.0, 'S':-0.5}
 TE, RE, PE, SE = payoff['T'],payoff['R'],payoff['P'],payoff['S']
 
 def my_plot(eta, chi,delta):# generate the figure and setting of the figure
     plt.ylim(0, 5)
     plt.xlim(-0.03, 0.3)
     
-    plt.yticks([1,2,3,4,5])
-    plt.xticks([0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30])
+    plt.yticks([1, 2, 3, 4, 5])
+    plt.xticks([0, 0.10, 0.20, 0.30])
     
-    plt.xlabel('$\epsilon+\\xi$',
-               fontsize = 18)
+    plt.xlabel('$\eta$',
+               fontsize = 20)
     plt.ylabel('$\chi_c$',
-               fontsize = 18)
+               fontsize = 20)
     
     plt.rcParams["xtick.direction"] = "in"  
     plt.rcParams["ytick.direction"] = "in"  
@@ -29,9 +29,9 @@ def my_plot(eta, chi,delta):# generate the figure and setting of the figure
              #color = '#1f77b4', 
              markersize = 1,
              label = delta)
-    plt.legend(title='$\delta$')
-    #plt.savefig('../data/figure/nondiscount_hao/{}.png'.format(n))
-
+    
+    plt.legend(title = '$\delta$')
+    
 def func1(eta, delta):
     mu = 1 - eta
     val = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) \
@@ -47,6 +47,7 @@ def func2(eta, delta):
     return val
 
 if __name__ == "__main__":
+    plt.figure(figsize=(8,6), dpi=70)
     for delta in [1.0,0.9,0.8]:
         eta_list = []; chi_list = []
         for eta in [i for i in np.linspace(0, 0.3, 100)]:
@@ -71,12 +72,16 @@ if __name__ == "__main__":
     chi_list2 = [1.571, 1.966, 2.565]
     
     plt.plot(eta_list2, chi_list2 , color='k',marker='o', linewidth=0)
+    for i, j in zip(eta_list2, chi_list2):
+        plt.annotate(j, xy=(i+0.01, j+0.01), fontsize = 18)
     
     eta_list3 = [0, 0, 0]
-    chi_list3 = [1.0, 1.235, 1.571]
+    chi_list3 = [1.000, 1.235, 1.571]
     plt.plot(eta_list3, chi_list3 , color='k', marker='o', linewidth=0)
-
-
+    for i, j in zip(eta_list3, chi_list3):
+        plt.annotate('{:.3f}'.format(j), xy=(i+0.01, j+0.01), fontsize = 18)
     
     plt.grid()
+    plt.tick_params(labelsize = 18)
     # plt.savefig('./equa_kappa_range.pdf')
+    # plt.savefig('./chi_c.pdf')

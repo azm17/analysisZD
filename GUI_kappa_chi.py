@@ -69,9 +69,9 @@ def save_fig():
 def DrawCanvas(canvas, ax, colors = "gray"):
     ax.cla()
     
-    delta = round(1-scale5.get()/100,2)
-    p0 = round(scale_p0.get()/1000,3)
-    eta = round(scale7.get()/1000,3)
+    delta = round(1-scale5.get() / 100,2)
+    p0    = round(scale_p0.get() / 1000,3)
+    eta   = round(scale7.get() / 1000,3)
     
     # plt.title(r"aaa", fontsize=15)
     # RE = R * (1 - eta) + S * eta
@@ -100,13 +100,15 @@ def DrawCanvas(canvas, ax, colors = "gray"):
     plt.yticks([-0.5, 0, 0.5, 1.0, 1.5])
     plt.xticks([1, 5, 10, 15, 20])
     
-    delta_c1 = (TE - RE) / (mu*(RE-PE)-eta*(TE-SE)+TE-RE)
-    delta_c2 = (PE - SE) / (mu*(RE-PE)-eta*(TE-SE)+PE-SE)
-    delta_c = max(delta_c1, delta_c2)
+    delta_c1 = (TE - RE) / (mu * (RE - PE) - eta * (TE - SE) + TE - RE)
+    delta_c2 = (PE - SE) / (mu * (RE - PE) - eta * (TE - SE) + PE - SE)
+    delta_c  = max(delta_c1, delta_c2)
     
-    chi_c1 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) / (delta * (mu*(RE-PE)-eta*(TE-SE)) - (1-delta)*(TE - RE))
-    chi_c2 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) / (delta * (mu*(RE-PE)-eta*(TE-SE)) - (1-delta)*(PE - SE))
-    chi_c = max(chi_c1, chi_c2)
+    chi_c1 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) \
+                 / (delta * (mu * (RE - PE) - eta * (TE - SE)) - (1 - delta) * (TE - RE))
+    chi_c2 = 1 + (1 - delta + 2 * delta * eta) * (TE - SE) \
+                 / (delta * (mu * (RE - PE) - eta * (TE - SE)) - (1 - delta) * (PE - SE))
+    chi_c  = max(chi_c1, chi_c2)
     
     chi_list = [i for i in np.linspace(chi_c, 20, 1000) if i <= 20 and i > 1]
     kappa_list1 = []; kappa_list2 = []
